@@ -114,10 +114,13 @@ $(function () {
             var rankings, rankingRow, team, index;
             rankings = [];
             for (team = 0; team<teamnames.length; ++team) {
-                rankingRow = {team:team,wins:0};
+                rankingRow = {team:team,wins:0,games:0};
                 for (index=0; index<teamnames.length; ++index) {
-                    if (index != team && result[team][index] === win) {
-                        ++rankingRow.wins;
+                    if (result[team][index] !== unknown) {
+                        ++rankingRow.games;
+                        if (result[team][index] === win) {
+                            ++rankingRow.wins;
+                        }
                     }
                 }
                 rankings.push(rankingRow);
@@ -137,16 +140,20 @@ $(function () {
 
         createRanking = function (ranking) {
             var index, row, table, htmlRow, htmlCell;
-            table = $('<table><th>Team</th><th>Wins</th></table>');
+
+            htmlCell = function(text) {
+                var html = $('<td></td>');
+                html.text(text);
+                return html;
+            }
+
+            table = $('<table><th>Team</th><th>Wins</th><th>Games</th></table>');
             for (index=0; index<ranking.length; ++index) {
                 row = ranking[index];
                 htmlRow = $('<tr id="ranking"></tr>');
-                htmlCell = $('<td></td>');
-                htmlCell.text(teamnames[row.team]);
-                htmlRow.append(htmlCell);
-                htmlCell = $('<td></td>');
-                htmlCell.text(row.wins);
-                htmlRow.append(htmlCell);
+                htmlRow.append(htmlCell(teamnames[row.team]));
+                htmlRow.append(htmlCell(row.wins));
+                htmlRow.append(htmlCell(row.games));
                 table.append(htmlRow);
             }
             return table;
