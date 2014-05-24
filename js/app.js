@@ -116,7 +116,7 @@ $(function () {
             for (team = 0; team<teamnames.length; ++team) {
                 rankingRow = {team:team,wins:0,games:0};
                 for (index=0; index<teamnames.length; ++index) {
-                    if (result[team][index] !== unknown) {
+                    if (result[team][index] !== unknown && result[team][index] !== self) {
                         ++rankingRow.games;
                         if (result[team][index] === win) {
                             ++rankingRow.wins;
