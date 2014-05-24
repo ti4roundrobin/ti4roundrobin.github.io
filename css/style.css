@@ -17,3 +17,6 @@ td,th {
     border: solid black 1px;
     padding: 0 2px;
 }
+.alert {
+    font-size: x-large;
+}

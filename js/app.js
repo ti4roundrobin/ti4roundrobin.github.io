@@ -403,7 +403,11 @@ $(function () {
 
     data = new URI().search(true)['games'];
     if (data) {
-        model.newState(url.parseUrl(data));
+        if (model.newState(url.parseUrl(data))) {
+            $('#results').before($('<p class="alert"><em>Note:</em> this page shows a potential future result table with games that have not happened yet filled out. You can also see the <a href="?">current results</a>.</p>'));
+        } else {
+            $('#results').before($('<p class="alert"><em>Note:</em> this page shows a result table that conflicts with games that have already happened. Please see the <a href="?">current results</a>.</p>'));
+        }
     }
     view.updateView(model);
 });
