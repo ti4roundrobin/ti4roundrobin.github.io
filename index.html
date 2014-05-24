@@ -2,20 +2,22 @@
 <html>
 <head>
 <title>TI4 qualifiers round robin overview</title>
+<script src="js/jquery-2.1.1.min.js"></script>
+<script src="js/app.js"></script>
 </head>
 <body>
-<table>
-<tr><th>Team name</th><th>Aware Gaming</th><th>hehe united</th><th>Meet Your Makers</th><th>Mousesports</th><th>NEXT.kz</th><th>Power Rangers</th><th>Relax</th><th>RoX.KIS</th><th>Team Coast</th><th>Virtus.pro</th></tr>
-<tr><th>Aware Gaming</th><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
-<tr><th>hehe united</th><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
-<tr><th>Meet Your Makers</th><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
-<tr><th>Mousesports</th><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
-<tr><th>NEXT.kz</th><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
-<tr><th>Power Rangers</th><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
-<tr><th>Relax</th><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
-<tr><th>RoX.KIS</th><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td></tr>
-<tr><th>Team Coast</th><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td></tr>
-<tr><th>Virtus.pro</th><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td></tr>
+<table id="results">
+<tr><th>Team name</th><th class="teamname">Aware Gaming</th><th class="teamname">hehe united</th><th class="teamname">Meet Your Makers</th><th class="teamname">Mousesports</th><th class="teamname">NEXT.kz</th><th class="teamname">Power Rangers</th><th class="teamname">Relax</th><th class="teamname">RoX.KIS</th><th class="teamname">Team Coast</th><th class="teamname">Virtus.pro</th></tr>
+<tr><th class="teamname">Aware Gaming</th><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
+<tr><th class="teamname">hehe united</th><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
+<tr><th class="teamname">Meet Your Makers</th><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
+<tr><th class="teamname">Mousesports</th><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
+<tr><th class="teamname">NEXT.kz</th><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
+<tr><th class="teamname">Power Rangers</th><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
+<tr><th class="teamname">Relax</th><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td><td>0-0</td></tr>
+<tr><th class="teamname">RoX.KIS</th><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td><td>0-0</td></tr>
+<tr><th class="teamname">Team Coast</th><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td><td>0-0</td></tr>
+<tr><th class="teamname">Virtus.pro</th><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>0-0</td><td>x</td></tr>
 </table>
 </body>
 </html>
