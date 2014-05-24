@@ -7,3 +7,13 @@
 .invalid {
     background-color: #e0e0e0;
 }
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: solid black 2px;
+    margin: 20px 0;
+}
+td,th {
+    border: solid black 1px;
+    padding: 0 2px;
+}
