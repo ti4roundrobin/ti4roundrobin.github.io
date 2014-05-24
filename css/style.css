@@ -1,0 +1,9 @@
+.win {
+    background-color: #e0ffe0;
+}
+.loss {
+    background-color: #ffe0e0;
+}
+.invalid {
+    background-color: #e0e0e0;
+}
