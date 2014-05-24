@@ -1,6 +1,6 @@
 $(function () {
     'use strict';
-    var teamnames, model, view, win, loss, unknown, self, validKnowledge, validResults, invert, text, url;
+    var teamnames, model, view, win, loss, unknown, self, validKnowledge, validResults, invert, text, url, data;
 
     win = "win";
     loss = "loss";
@@ -73,10 +73,15 @@ $(function () {
             var index, index2, index3;
             index3 = 0;
             for(index = 0; index < teamnames.length; index++) {
-                for(index2 = index+1; index1 < teamnames.length; index2++) {
-                    result[index][index2] = stateArray[index3];
-                    result[index2][index] = invert[stateArray[index3]];
-                    index3++;
+                for(index2 = index+1; index2 < teamnames.length; index2++) {
+                    if (index3<stateArray.length) {
+                        var state = stateArray[index3];
+                        result[index][index2] = state;
+                        result[index2][index] = invert[state];
+                        index3++;
+                    } else {
+                        throw 'State array too short - ran out at ' + index3 + ' elements';
+                    }
                 }
             }
             if (index3 < stateArray.length) {
@@ -104,5 +109,9 @@ $(function () {
         return {updateView:updateView, updateGame:updateGame};
     }());
 
+    data = new URI().search(true)['games'];
+    if (data) {
+        model.newState(url.parseUrl(data));
+    }
     view.updateView(model);
 });
