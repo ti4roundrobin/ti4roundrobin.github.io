@@ -31,7 +31,7 @@ $(function () {
     }());
 
     model = (function () {
-        var originalResult, result, index, index2, getResult, setGame, newState, reset;
+        var originalResult, result, index, index2, getResult, setGame, newState, reset, getRanking;
         
         originalResult = [];
         for(index = 0; index < teamnames.length; ++index){
@@ -110,12 +110,47 @@ $(function () {
             }
         }
 
+        getRanking = function() {
+            var rankings, rankingRow, team, index;
+            rankings = [];
+            for (team = 0; team<teamnames.length; ++team) {
+                rankingRow = {team:team,wins:0};
+                for (index=0; index<teamnames.length; ++index) {
+                    if (index != team && result[team][index] === win) {
+                        ++rankingRow.wins;
+                    }
+                }
+                rankings.push(rankingRow);
+            }
+            rankings.sort(function (a,b){
+                return b.wins - a.wins;
+            });
+            return rankings;
+        }
+
         reset();
-        return {getResult:getResult, newState:newState, setGame:setGame, reset:reset};
+        return {getResult:getResult, newState:newState, setGame:setGame, reset:reset, getRanking:getRanking};
     }());
 
     view = (function (){
-        var updateView, updateCell, updateGame, cells;
+        var updateView, updateCell, updateGame, cells, createRanking;
+
+        createRanking = function (ranking) {
+            var index, row, table, htmlRow, htmlCell;
+            table = $('<table><th>Team</th><th>Wins</th></table>');
+            for (index=0; index<ranking.length; ++index) {
+                row = ranking[index];
+                htmlRow = $('<tr id="ranking"></tr>');
+                htmlCell = $('<td></td>');
+                htmlCell.text(teamnames[row.team]);
+                htmlRow.append(htmlCell);
+                htmlCell = $('<td></td>');
+                htmlCell.text(row.wins);
+                htmlRow.append(htmlCell);
+                table.append(htmlRow);
+            }
+            return table;
+        }
 
         updateCell = function (cell, score) {
             $(cell).text(text[score]);
@@ -134,6 +169,8 @@ $(function () {
                     updateCell(cells[index][index2], model.getResult(index,index2));
                 }
             }
+            $('#ranking').remove();
+            $('table#results').after(createRanking(model.getRanking()));
         };
 
         cells = [];
@@ -143,6 +180,8 @@ $(function () {
                 cells[firstTeam][secondTeam] = cell;
             });
         });
+
+
 
         return {updateView:updateView, updateGame:updateGame};
     }());
