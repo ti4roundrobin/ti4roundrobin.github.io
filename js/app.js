@@ -27,7 +27,7 @@ $(function () {
     }());
 
     model = (function () {
-        var originalResult, result, index, index2;
+        var originalResult, result, index, index2, getResult;
         
         originalResult = [];
         for(index = 0; index < teamnames.length; ++index){
@@ -53,7 +53,7 @@ $(function () {
         for(index = 0; index < teamnames.length; ++index){
             for(index2 = index+1; index2 < teamnames.length; ++index2){
                 if (originalResult[index][index2] !== invert[originalResult[index2][index]]) {
-                    alert('Internal error - result table is inconsistent at row ' + index + 'column ' + index2);
+                    alert('Internal error - result table is inconsistent at ' + index + ',' + index2);
                     return undefined;
                 }
             }
@@ -61,7 +61,10 @@ $(function () {
 
         result = originalResult;
 
+        getResult = function (firstTeam, secondTeam) {
+            return result[firstTeam][secondTeam];
+        }
 
-        return {result:result};
+        return {getResult:getResult};
     }());
 });
