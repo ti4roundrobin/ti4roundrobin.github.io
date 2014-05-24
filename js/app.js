@@ -44,7 +44,7 @@ $(function () {
     }());
 
     model = (function () {
-        var originalResult, result, index, index2, getResult, setGame, getBestRank, newState, cloneResults, reset, getRanking;
+        var originalResult, result, index, index2, getResult, setGame, getBestRank, getWorstRank, newState, cloneResults, reset, getRanking;
 
         originalResult = [];
         for (index = 0; index < teamnames.length; ++index) {
@@ -131,7 +131,7 @@ $(function () {
         };
 
         getBestRank = function (team) {
-            var possibleWins, bestResult, opponent, opponentsOpponent, opponentWins, bestRank, unknowns;
+            var possibleWins, bestResult, opponent, opponentsOpponent, opponentWins, opponentUnknowns, bestRank, unknowns, opponentWinsWorst, unknownIndex;
             bestResult = cloneResults(result);
             possibleWins = 0;
             for (opponent = 0; opponent < teamnames.length; ++opponent) {
@@ -149,13 +149,18 @@ $(function () {
             for (opponent = 0; opponent < teamnames.length; ++opponent) {
                 if (opponent !== team) {
                     opponentWins = 0;
+                    opponentUnknowns = 0;
                     for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
                         if (bestResult[opponent][opponentsOpponent] === win) {
                             ++opponentWins;
+                        } else if (bestResult[opponent][opponentsOpponent] === unknown) {
+                            ++opponentUnknowns;
                         }
                     }
-                    if (opponentWins > possibleWins) {
-                        ++bestRank;
+                    if (opponentWins > possibleWins || opponentWins + opponentUnknowns <= possibleWins) {
+                        if (opponentWins > possibleWins) {
+                            ++bestRank;
+                        }
                         for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
                             if (bestResult[opponent][opponentsOpponent] === unknown) {
                                 bestResult[opponent][opponentsOpponent] = win;
@@ -165,24 +170,133 @@ $(function () {
                     }
                 }
             }
-            unknowns = 0;
+            unknowns = [];
             for (opponent = 0; opponent < teamnames.length; ++opponent) {
                 if (opponent !== team) {
                     opponentWins = 0;
+                    opponentWinsWorst = 0;
                     for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
-                        if (bestResult[opponent][opponentsOpponent] === win || bestResult[opponent][opponentsOpponent] === unknown) {
+                        if (bestResult[opponent][opponentsOpponent] === win) {
+                            ++opponentWins;
+                            ++opponentWinsWorst;
+                        } else if (bestResult[opponent][opponentsOpponent] === unknown) {
                             ++opponentWins;
                         }
                     }
-                    if (opponentWins > possibleWins) {
-                        ++unknowns;
+                    if (opponentWins > possibleWins && opponentWinsWorst < possibleWins) {
+                        unknowns.push({team: opponent, maxWins: opponentWins, minWins: opponentWinsWorst});
                     }
                 }
             }
-            if (unknowns < 2) {
+            if (unknowns.length < 2) {
                 return bestRank;
             } else {
-                return '<=' + bestRank;
+                for (unknownIndex = 0; unknownIndex < unknowns.length; ++unknownIndex) {
+                    opponent = unknowns[unknownIndex].team;
+                    opponentWins = unknowns[unknownIndex].opponentWinsWorst;
+                    for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
+                        if (bestResult[opponent][opponentsOpponent] === unknown) {
+                            if (opponentWins < possibleWins) {
+                                bestResult[opponent][opponentsOpponent] = win;
+                                bestResult[opponentsOpponent][opponent] = loss;
+                                ++opponentWins;
+                            }
+                        }
+                    }
+                }
+                for (opponent = 0; opponent < teamnames.length; ++opponent) {
+                    for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
+                        if (bestResult[opponent][opponentsOpponent] == unknown) {
+                            return '<=' + bestRank;
+                        }
+                    }
+                }
+                return bestRank;
+            }
+        };
+
+        getWorstRank = function (team) {
+            var possibleWins, bestResult, opponent, opponentsOpponent, opponentWins, opponentUnknowns, bestRank, unknowns, opponentWinsWorst, unknownIndex;
+            bestResult = cloneResults(result);
+            possibleWins = 0;
+            for (opponent = 0; opponent < teamnames.length; ++opponent) {
+                if (opponent !== team) {
+                    if (bestResult[team][opponent] === unknown) {
+                        ++possibleWins;
+                        bestResult[team][opponent] = loss;
+                        bestResult[opponent][team] = win;
+                    } else if (bestResult[team][opponent] === loss) {
+                        ++possibleWins;
+                    }
+                }
+            }
+            bestRank = 1;
+            for (opponent = 0; opponent < teamnames.length; ++opponent) {
+                if (opponent !== team) {
+                    opponentWins = 0;
+                    opponentUnknowns = 0;
+                    for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
+                        if (bestResult[opponent][opponentsOpponent] === loss) {
+                            ++opponentWins;
+                        } else if (bestResult[opponent][opponentsOpponent] === unknown) {
+                            ++opponentUnknowns;
+                        }
+                    }
+                    if (opponentWins > possibleWins || opponentWins + opponentUnknowns <= possibleWins) {
+                        if (opponentWins > possibleWins) {
+                            ++bestRank;
+                        }
+                        for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
+                            if (bestResult[opponent][opponentsOpponent] === unknown) {
+                                bestResult[opponent][opponentsOpponent] = loss;
+                                bestResult[opponentsOpponent][opponent] = win;
+                            }
+                        }
+                    }
+                }
+            }
+            unknowns = [];
+            for (opponent = 0; opponent < teamnames.length; ++opponent) {
+                if (opponent !== team) {
+                    opponentWins = 0;
+                    opponentWinsWorst = 0;
+                    for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
+                        if (bestResult[opponent][opponentsOpponent] === loss) {
+                            ++opponentWins;
+                            ++opponentWinsWorst;
+                        } else if (bestResult[opponent][opponentsOpponent] === unknown) {
+                            ++opponentWins;
+                        }
+                    }
+                    if (opponentWins > possibleWins && opponentWinsWorst < possibleWins) {
+                        unknowns.push({team: opponent, maxWins: opponentWins, minWins: opponentWinsWorst});
+                    }
+                }
+            }
+            if (unknowns.length < 2) {
+                return teamnames.length + 1 - bestRank;
+            } else {
+                for (unknownIndex = 0; unknownIndex < unknowns.length; ++unknownIndex) {
+                    opponent = unknowns[unknownIndex].team;
+                    opponentWins = unknowns[unknownIndex].opponentWinsWorst;
+                    for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
+                        if (bestResult[opponent][opponentsOpponent] === unknown) {
+                            if (opponentWins < possibleWins) {
+                                bestResult[opponent][opponentsOpponent] = loss;
+                                bestResult[opponentsOpponent][opponent] = win;
+                                ++opponentWins;
+                            }
+                        }
+                    }
+                }
+                for (opponent = 0; opponent < teamnames.length; ++opponent) {
+                    for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
+                        if (bestResult[opponent][opponentsOpponent] == unknown) {
+                            return '>=' + (teamnames.length + 1 - bestRank);
+                        }
+                    }
+                }
+                return teamnames.length + 1 - bestRank;
             }
         };
 
@@ -202,8 +316,9 @@ $(function () {
                             ++rankingRow.wins;
                         }
                     }
-                    rankingRow.bestRank = getBestRank(team);
                 }
+                rankingRow.bestRank = getBestRank(team);
+                rankingRow.worstRank = getWorstRank(team);
                 rankings.push(rankingRow);
             }
             rankings.sort(function (a, b) {
@@ -234,7 +349,7 @@ $(function () {
                 return html;
             };
 
-            table = $('<table><th>Team</th><th>Wins</th><th>Losses</th><th>Games</th><th>Best possible rank</th></table>');
+            table = $('<table><th>Team</th><th>Wins</th><th>Losses</th><th>Games</th><th>Best possible rank</th><th>Worst possible rank</th></table>');
             for (index = 0; index < ranking.length; ++index) {
                 row = ranking[index];
                 htmlRow = $('<tr id="ranking"></tr>');
@@ -243,6 +358,7 @@ $(function () {
                 htmlRow.append(htmlCell(row.games - row.wins));
                 htmlRow.append(htmlCell(row.games));
                 htmlRow.append(htmlCell(row.bestRank));
+                htmlRow.append(htmlCell(row.worstRank));
                 table.append(htmlRow);
             }
             return table;
