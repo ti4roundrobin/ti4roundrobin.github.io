@@ -44,7 +44,7 @@ $(function () {
     }());
 
     model = (function () {
-        var originalResult, result, index, index2, getResult, setGame, newState, reset, getRanking;
+        var originalResult, result, index, index2, getResult, setGame, getBestRank, newState, cloneResults, reset, getRanking;
 
         originalResult = [];
         for (index = 0; index < teamnames.length; ++index) {
@@ -115,13 +115,74 @@ $(function () {
             return originalResult[winTeam][loseTeam] === loss;
         };
 
-        reset = function () {
-            result = [];
+        cloneResults = function (originalArray) {
+            var returnValue = [];
             for (index = 0; index < teamnames.length; index++) {
-                result[index] = [];
+                returnValue[index] = [];
                 for (index2 = 0; index2 < teamnames.length; index2++) {
-                    result[index][index2] = originalResult[index][index2];
+                    returnValue[index][index2] = originalArray[index][index2];
                 }
+            }
+            return returnValue;
+        };
+
+        reset = function () {
+            result = cloneResults(originalResult);
+        };
+
+        getBestRank = function (team) {
+            var possibleWins, bestResult, opponent, opponentsOpponent, opponentWins, bestRank, unknowns;
+            bestResult = cloneResults(result);
+            possibleWins = 0;
+            for (opponent = 0; opponent < teamnames.length; ++opponent) {
+                if (opponent !== team) {
+                    if (bestResult[team][opponent] === unknown) {
+                        ++possibleWins;
+                        bestResult[team][opponent] = win;
+                        bestResult[opponent][team] = loss;
+                    } else if (bestResult[team][opponent] === win) {
+                        ++possibleWins;
+                    }
+                }
+            }
+            bestRank = 1;
+            for (opponent = 0; opponent < teamnames.length; ++opponent) {
+                if (opponent !== team) {
+                    opponentWins = 0;
+                    for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
+                        if (bestResult[opponent][opponentsOpponent] === win) {
+                            ++opponentWins;
+                        }
+                    }
+                    if (opponentWins > possibleWins) {
+                        ++bestRank;
+                        for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
+                            if (bestResult[opponent][opponentsOpponent] === unknown) {
+                                bestResult[opponent][opponentsOpponent] = win;
+                                bestResult[opponentsOpponent][opponent] = loss;
+                            }
+                        }
+                    }
+                }
+            }
+            unknowns = 0;
+            for (opponent = 0; opponent < teamnames.length; ++opponent) {
+                if (opponent !== team) {
+                    opponentWins = 0;
+                    for (opponentsOpponent = 0; opponentsOpponent < teamnames.length; ++opponentsOpponent) {
+                        if (bestResult[opponent][opponentsOpponent] === win || bestResult[opponent][opponentsOpponent] === unknown) {
+                            ++opponentWins;
+                        }
+                    }
+                    if (opponentWins > possibleWins) {
+                        ++unknowns;
+                    }
+                }
+            }
+            if (unknowns < 2) {
+                return bestRank;
+            } else {
+                return '<=' + bestRank;
             }
         };
 
@@ -141,6 +202,7 @@ $(function () {
                             ++rankingRow.wins;
                         }
                     }
+                    rankingRow.bestRank = getBestRank(team);
                 }
                 rankings.push(rankingRow);
             }
@@ -172,14 +234,15 @@ $(function () {
                 return html;
             };
 
-            table = $('<table><th>Team</th><th>Wins</th><th>Losses</th><th>Games</th></table>');
+            table = $('<table><th>Team</th><th>Wins</th><th>Losses</th><th>Games</th><th>Best possible rank</th></table>');
             for (index = 0; index < ranking.length; ++index) {
                 row = ranking[index];
                 htmlRow = $('<tr id="ranking"></tr>');
                 htmlRow.append(htmlCell(teamnames[row.team]));
                 htmlRow.append(htmlCell(row.wins));
-                htmlRow.append(htmlCell(row.games-row.wins));
+                htmlRow.append(htmlCell(row.games - row.wins));
                 htmlRow.append(htmlCell(row.games));
+                htmlRow.append(htmlCell(row.bestRank));
                 table.append(htmlRow);
             }
             return table;
