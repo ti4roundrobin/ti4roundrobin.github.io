@@ -31,7 +31,7 @@ $(function () {
     }());
 
     model = (function () {
-        var originalResult, result, index, index2, getResult, newState;
+        var originalResult, result, index, index2, getResult, setGame, newState, reset;
         
         originalResult = [];
         for(index = 0; index < teamnames.length; ++index){
@@ -63,21 +63,25 @@ $(function () {
             }
         }
 
-        result = originalResult;
-
         getResult = function (firstTeam, secondTeam) {
             return result[firstTeam][secondTeam];
         }
 
         newState = function (stateArray) {
-            var index, index2, index3;
+            var index, index2, index3, original;
             index3 = 0;
+            original = true;
             for(index = 0; index < teamnames.length; index++) {
                 for(index2 = index+1; index2 < teamnames.length; index2++) {
                     if (index3<stateArray.length) {
                         var state = stateArray[index3];
-                        result[index][index2] = state;
-                        result[index2][index] = invert[state];
+                        if (state !== unknown) {
+                            result[index][index2] = state;
+                            result[index2][index] = invert[state];
+                            if (originalResult[index][index2] !== unknown && originalResult[index][index2] !== state) {
+                                original = false;
+                            }
+                        }
                         index3++;
                     } else {
                         throw 'State array too short - ran out at ' + index3 + ' elements';
@@ -87,24 +91,58 @@ $(function () {
             if (index3 < stateArray.length) {
                 throw 'State array too long - expected ' + index3 + ' elements, but had ' + stateArray.length;
             }
+            return original;
         }
 
-        return {getResult:getResult, newState:newState};
+        setGame = function (winTeam, loseTeam) {
+            result[winTeam][loseTeam] = win;
+            result[loseTeam][winTeam] = loss;
+            return originalResult[winTeam][loseTeam] === loss;
+        }
+
+        reset = function () {
+            result = [];
+            for(index = 0; index < teamnames.length; index++) {
+                result[index] = [];
+                for(index2 = 0; index2 < teamnames.length; index2++) {
+                    result[index][index2] = originalResult[index][index2];
+                }
+            }
+        }
+
+        reset();
+        return {getResult:getResult, newState:newState, setGame:setGame, reset:reset};
     }());
 
     view = (function (){
-        var updateView, updateGame;
+        var updateView, updateCell, updateGame, cells;
+
+        updateCell = function (cell, score) {
+            $(cell).text(text[score]);
+            $(cell).removeClass(validKnowledge.join(' ')).addClass(score);
+        }
+
+        updateGame = function (winTeam, lossTeam) {
+            updateCell(cells[winTeam][lossTeam], win);
+            updateCell(cells[lossTeam][winTeam], win);
+        }
 
         updateView = function (model){
-            $('table#results tr').filter(function () {return $("td", this).length > 0;}).each(function (firstTeam, row) {
-                $('td', row).each(function (secondTeam, cell) {
-                    var score, firstText, secondText;
-                    score = model.getResult(firstTeam, secondTeam);
-                    $(cell).text(text[score]);
-                    $(cell).removeClass(validKnowledge.join(' ')).addClass(score);
-                });
-            });
+            var index,index2;
+            for(index = 0; index < teamnames.length; index++) {
+                for(index2 = 0; index2 < teamnames.length; index2++) {
+                    updateCell(cells[index][index2], model.getResult(index,index2));
+                }
+            }
         };
+
+        cells = [];
+        $('table#results tr').filter(function () {return $("td", this).length > 0;}).each(function (firstTeam, row) {
+            cells[firstTeam] = [];
+            $('td', row).each(function (secondTeam, cell) {
+                cells[firstTeam][secondTeam] = cell;
+            });
+        });
 
         return {updateView:updateView, updateGame:updateGame};
     }());
