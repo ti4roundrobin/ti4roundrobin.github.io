@@ -30,12 +30,12 @@ $(function () {
 
         parseUrl = function (urlString) {
             var results = $.map(urlString.split(''), function (c) {
-                return c == 'A' ? win : c == 'B' ? loss : unknown
+                return c === 'A' ? win : c === 'B' ? loss : unknown;
             });
             return results;
-        }
+        };
 
-        createUrl = function (model) {}
+        createUrl = function (model) {};
 
         return {
             parseUrl: parseUrl,
@@ -80,16 +80,16 @@ $(function () {
 
         getResult = function (firstTeam, secondTeam) {
             return result[firstTeam][secondTeam];
-        }
+        };
 
         newState = function (stateArray) {
-            var index, index2, index3, original;
+            var index, index2, index3, original, state;
             index3 = 0;
             original = true;
             for (index = 0; index < teamnames.length; index++) {
                 for (index2 = index + 1; index2 < teamnames.length; index2++) {
                     if (index3 < stateArray.length) {
-                        var state = stateArray[index3];
+                        state = stateArray[index3];
                         if (state !== unknown) {
                             result[index][index2] = state;
                             result[index2][index] = invert[state];
@@ -107,13 +107,13 @@ $(function () {
                 throw 'State array too long - expected ' + index3 + ' elements, but had ' + stateArray.length;
             }
             return original;
-        }
+        };
 
         setGame = function (winTeam, loseTeam) {
             result[winTeam][loseTeam] = win;
             result[loseTeam][winTeam] = loss;
             return originalResult[winTeam][loseTeam] === loss;
-        }
+        };
 
         reset = function () {
             result = [];
@@ -123,7 +123,7 @@ $(function () {
                     result[index][index2] = originalResult[index][index2];
                 }
             }
-        }
+        };
 
         getRanking = function () {
             var rankings, rankingRow, team, index;
@@ -148,7 +148,7 @@ $(function () {
                 return b.wins - a.wins;
             });
             return rankings;
-        }
+        };
 
         reset();
         return {
@@ -170,7 +170,7 @@ $(function () {
                 var html = $('<td></td>');
                 html.text(text);
                 return html;
-            }
+            };
 
             table = $('<table><th>Team</th><th>Wins</th><th>Games</th></table>');
             for (index = 0; index < ranking.length; ++index) {
@@ -182,17 +182,17 @@ $(function () {
                 table.append(htmlRow);
             }
             return table;
-        }
+        };
 
         updateCell = function (cell, score) {
             $(cell).text(text[score]);
             $(cell).removeClass(validKnowledge.join(' ')).addClass(score);
-        }
+        };
 
         updateGame = function (winTeam, lossTeam) {
             updateCell(cells[winTeam][lossTeam], win);
             updateCell(cells[lossTeam][winTeam], win);
-        }
+        };
 
         updateView = function (model) {
             var index, index2;
