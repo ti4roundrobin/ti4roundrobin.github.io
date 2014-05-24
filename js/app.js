@@ -1,6 +1,6 @@
 $(function () {
     'use strict';
-    var teamnames, model, win, loss, unknown, self, validKnowledge, validResults, invert, url;
+    var teamnames, model, view, win, loss, unknown, self, validKnowledge, validResults, invert, text, url;
 
     win = "win";
     loss = "loss";
@@ -9,6 +9,7 @@ $(function () {
     validKnowledge = [win, loss, unknown];
     validResults = [win, loss];
     invert = {win:loss, loss:win, unknown:unknown, self:self};
+    text = {win:'1-0', loss:'0-1', unknown:'0-0'};
 
     teamnames = [];
     $('table#results tr th.teamname:first-child').each(function () {
@@ -18,16 +19,19 @@ $(function () {
     url = (function () {
         var parseUrl, createUrl;
 
-        parseUrl = function(urlString) {
+        parseUrl = function (urlString) {
             var results = $.map(urlString.split(''), function (c){return c=='A'?win:c=='B'?loss:unknown});
-            alert(results);
+            return results;
+        }
+
+        createUrl = function (model) {
         }
 
         return {parseUrl:parseUrl,createUrl:createUrl};
     }());
 
     model = (function () {
-        var originalResult, result, index, index2, getResult;
+        var originalResult, result, index, index2, getResult, newState;
         
         originalResult = [];
         for(index = 0; index < teamnames.length; ++index){
@@ -65,6 +69,40 @@ $(function () {
             return result[firstTeam][secondTeam];
         }
 
-        return {getResult:getResult};
+        newState = function (stateArray) {
+            var index, index2, index3;
+            index3 = 0;
+            for(index = 0; index < teamnames.length; index++) {
+                for(index2 = index+1; index1 < teamnames.length; index2++) {
+                    result[index][index2] = stateArray[index3];
+                    result[index2][index] = invert[stateArray[index3]];
+                    index3++;
+                }
+            }
+            if (index3 < stateArray.length) {
+                throw 'State array too long - expected ' + index3 + ' elements, but had ' + stateArray.length;
+            }
+        }
+
+        return {getResult:getResult, newState:newState};
     }());
+
+    view = (function (){
+        var updateView, updateGame;
+
+        updateView = function (model){
+            $('table#results tr').filter(function () {return $("td", this).length > 0;}).each(function (firstTeam, row) {
+                $('td', row).each(function (secondTeam, cell) {
+                    var score, firstText, secondText;
+                    score = model.getResult(firstTeam, secondTeam);
+                    $(cell).text(text[score]);
+                    $(cell).removeClass(validKnowledge.join(' ')).addClass(score);
+                });
+            });
+        };
+
+        return {updateView:updateView, updateGame:updateGame};
+    }());
+
+    view.updateView(model);
 });
