@@ -172,12 +172,13 @@ $(function () {
                 return html;
             };
 
-            table = $('<table><th>Team</th><th>Wins</th><th>Games</th></table>');
+            table = $('<table><th>Team</th><th>Wins</th><th>Losses</th><th>Games</th></table>');
             for (index = 0; index < ranking.length; ++index) {
                 row = ranking[index];
                 htmlRow = $('<tr id="ranking"></tr>');
                 htmlRow.append(htmlCell(teamnames[row.team]));
                 htmlRow.append(htmlCell(row.wins));
+                htmlRow.append(htmlCell(row.games-row.wins));
                 htmlRow.append(htmlCell(row.games));
                 table.append(htmlRow);
             }
