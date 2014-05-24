@@ -8,8 +8,17 @@ $(function () {
     self = "invalid";
     validKnowledge = [win, loss, unknown];
     validResults = [win, loss];
-    invert = {win:loss, loss:win, unknown:unknown, self:self};
-    text = {win:'1-0', loss:'0-1', unknown:'0-0'};
+    invert = {
+        win: loss,
+        loss: win,
+        unknown: unknown,
+        self: self
+    };
+    text = {
+        win: '1-0',
+        loss: '0-1',
+        unknown: '0-0'
+    };
 
     teamnames = [];
     $('table#results tr th.teamname:first-child').each(function () {
@@ -20,32 +29,38 @@ $(function () {
         var parseUrl, createUrl;
 
         parseUrl = function (urlString) {
-            var results = $.map(urlString.split(''), function (c){return c=='A'?win:c=='B'?loss:unknown});
+            var results = $.map(urlString.split(''), function (c) {
+                return c == 'A' ? win : c == 'B' ? loss : unknown
+            });
             return results;
         }
 
-        createUrl = function (model) {
-        }
+        createUrl = function (model) {}
 
-        return {parseUrl:parseUrl,createUrl:createUrl};
+        return {
+            parseUrl: parseUrl,
+            createUrl: createUrl
+        };
     }());
 
     model = (function () {
         var originalResult, result, index, index2, getResult, setGame, newState, reset, getRanking;
-        
+
         originalResult = [];
-        for(index = 0; index < teamnames.length; ++index){
-            originalResult[index]=[];
-            for(index2 = 0; index2 < teamnames.length; ++index2){
+        for (index = 0; index < teamnames.length; ++index) {
+            originalResult[index] = [];
+            for (index2 = 0; index2 < teamnames.length; ++index2) {
                 originalResult[index][index2] = unknown;
             }
         }
-        $('table#results tr').filter(function () {return $("td", this).length > 0;}).each(function (firstTeam, row) {
+        $('table#results tr').filter(function () {
+            return $("td", this).length > 0;
+        }).each(function (firstTeam, row) {
             $('td', row).each(function (secondTeam, score) {
                 var scoreText = $(score).text();
                 if (firstTeam === secondTeam) {
                     originalResult[firstTeam][secondTeam] = self;
-                } else if (scoreText === '1-0'){
+                } else if (scoreText === '1-0') {
                     originalResult[firstTeam][secondTeam] = win;
                 } else if (scoreText === '0-1') {
                     originalResult[firstTeam][secondTeam] = loss;
@@ -54,8 +69,8 @@ $(function () {
                 }
             });
         });
-        for(index = 0; index < teamnames.length; ++index){
-            for(index2 = index+1; index2 < teamnames.length; ++index2){
+        for (index = 0; index < teamnames.length; ++index) {
+            for (index2 = index + 1; index2 < teamnames.length; ++index2) {
                 if (originalResult[index][index2] !== invert[originalResult[index2][index]]) {
                     alert('Internal error - result table is inconsistent at ' + index + ',' + index2);
                     return undefined;
@@ -71,9 +86,9 @@ $(function () {
             var index, index2, index3, original;
             index3 = 0;
             original = true;
-            for(index = 0; index < teamnames.length; index++) {
-                for(index2 = index+1; index2 < teamnames.length; index2++) {
-                    if (index3<stateArray.length) {
+            for (index = 0; index < teamnames.length; index++) {
+                for (index2 = index + 1; index2 < teamnames.length; index2++) {
+                    if (index3 < stateArray.length) {
                         var state = stateArray[index3];
                         if (state !== unknown) {
                             result[index][index2] = state;
@@ -102,20 +117,24 @@ $(function () {
 
         reset = function () {
             result = [];
-            for(index = 0; index < teamnames.length; index++) {
+            for (index = 0; index < teamnames.length; index++) {
                 result[index] = [];
-                for(index2 = 0; index2 < teamnames.length; index2++) {
+                for (index2 = 0; index2 < teamnames.length; index2++) {
                     result[index][index2] = originalResult[index][index2];
                 }
             }
         }
 
-        getRanking = function() {
+        getRanking = function () {
             var rankings, rankingRow, team, index;
             rankings = [];
-            for (team = 0; team<teamnames.length; ++team) {
-                rankingRow = {team:team,wins:0,games:0};
-                for (index=0; index<teamnames.length; ++index) {
+            for (team = 0; team < teamnames.length; ++team) {
+                rankingRow = {
+                    team: team,
+                    wins: 0,
+                    games: 0
+                };
+                for (index = 0; index < teamnames.length; ++index) {
                     if (result[team][index] !== unknown && result[team][index] !== self) {
                         ++rankingRow.games;
                         if (result[team][index] === win) {
@@ -125,30 +144,36 @@ $(function () {
                 }
                 rankings.push(rankingRow);
             }
-            rankings.sort(function (a,b){
+            rankings.sort(function (a, b) {
                 return b.wins - a.wins;
             });
             return rankings;
         }
 
         reset();
-        return {getResult:getResult, newState:newState, setGame:setGame, reset:reset, getRanking:getRanking};
+        return {
+            getResult: getResult,
+            newState: newState,
+            setGame: setGame,
+            reset: reset,
+            getRanking: getRanking
+        };
     }());
 
-    view = (function (){
+    view = (function () {
         var updateView, updateCell, updateGame, cells, createRanking;
 
         createRanking = function (ranking) {
             var index, row, table, htmlRow, htmlCell;
 
-            htmlCell = function(text) {
+            htmlCell = function (text) {
                 var html = $('<td></td>');
                 html.text(text);
                 return html;
             }
 
             table = $('<table><th>Team</th><th>Wins</th><th>Games</th></table>');
-            for (index=0; index<ranking.length; ++index) {
+            for (index = 0; index < ranking.length; ++index) {
                 row = ranking[index];
                 htmlRow = $('<tr id="ranking"></tr>');
                 htmlRow.append(htmlCell(teamnames[row.team]));
@@ -169,11 +194,11 @@ $(function () {
             updateCell(cells[lossTeam][winTeam], win);
         }
 
-        updateView = function (model){
-            var index,index2;
-            for(index = 0; index < teamnames.length; index++) {
-                for(index2 = 0; index2 < teamnames.length; index2++) {
-                    updateCell(cells[index][index2], model.getResult(index,index2));
+        updateView = function (model) {
+            var index, index2;
+            for (index = 0; index < teamnames.length; index++) {
+                for (index2 = 0; index2 < teamnames.length; index2++) {
+                    updateCell(cells[index][index2], model.getResult(index, index2));
                 }
             }
             $('#ranking').remove();
@@ -181,16 +206,19 @@ $(function () {
         };
 
         cells = [];
-        $('table#results tr').filter(function () {return $("td", this).length > 0;}).each(function (firstTeam, row) {
+        $('table#results tr').filter(function () {
+            return $("td", this).length > 0;
+        }).each(function (firstTeam, row) {
             cells[firstTeam] = [];
             $('td', row).each(function (secondTeam, cell) {
                 cells[firstTeam][secondTeam] = cell;
             });
         });
 
-
-
-        return {updateView:updateView, updateGame:updateGame};
+        return {
+            updateView: updateView,
+            updateGame: updateGame
+        };
     }());
 
     data = new URI().search(true)['games'];
