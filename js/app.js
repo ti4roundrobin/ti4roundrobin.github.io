@@ -44,7 +44,7 @@ $(function () {
     }());
 
     model = (function () {
-        var originalResult, result, index, index2, getResult, setGame, getBestRank, getWorstRank, newState, cloneResults, reset, getRanking;
+        var originalResult, result, index, index2, getResult, setGame, getBestRank, getWorstRank, newState, cloneResults, reset, getRanking, getPossibilities, getFact;
 
         originalResult = [];
         for (index = 0; index < teamnames.length; ++index) {
@@ -327,18 +327,105 @@ $(function () {
             return rankings;
         };
 
+        getFact = function (clone, bits, games) {
+            var fact, game, wins, team1, team2, teamWins, limit, current, count;
+            fact = [];
+            for (game = 0; game < games.length; ++game) {
+                if ((bits & Math.pow(2,game)) == 0) {
+                    clone[games[game][0]][games[game][1]] = win;
+                    clone[games[game][1]][games[game][0]] = loss;
+                } else {
+                    clone[games[game][0]][games[game][1]] = loss;
+                    clone[games[game][1]][games[game][0]] = win;
+                }
+            }
+            wins=[];
+            for (team1 = 0; team1 < teamnames.length; ++team1) {
+                teamWins = 0;
+                for (team2 = 0; team2 < teamnames.length; ++team2) {
+                    if (clone[team1][team2] == win) {
+                        ++teamWins;
+                    }
+                }
+                wins.push(teamWins);
+            }
+            wins.sort();
+            limit = wins[wins.length-4];
+            current = 1000;
+            count = 0;
+            for (teamWins = 1; teamWins <=wins.length && wins[wins.length-teamWins] >= limit; ++teamWins) {
+                if (wins[wins.length-teamWins] != current) {
+                    if (count > 1) {
+                        fact.push(count+" players in tiebreaker for #" + (teamWins-count) + " to #"+ (teamWins-1) +" slot");
+                    }
+                    current = wins[wins.length-teamWins];
+                    count = 0;
+                }
+                ++count;
+            }
+            if (count > 1) {
+                fact.push(count+" players in tiebreaker for #" + (teamWins-count) + " to #"+ (teamWins-1) +" slot");
+            }
+            if (fact.length > 0) {
+                return fact.join(", ");
+            } else {
+                return "#1-#4 uniquely determined";
+            }
+        };
+
+        getPossibilities = function () {
+            var games, facts, team, opponent, bits, gameBits, clone;
+            games = [];
+            facts = [];
+            for (team = 0; team < teamnames.length; ++team) {
+                for (opponent = team + 1; opponent < teamnames.length; ++opponent) {
+                    if (result[team][opponent] === unknown) {
+                        games.push([team,opponent]);
+                    }
+                }
+            }
+            if (games.length < 10) {
+                bits = Math.pow(2,games.length);
+            }
+            for (gameBits = 0; gameBits<bits; ++gameBits) {
+                clone = cloneResults(result);
+                facts.push(getFact(clone,gameBits,games));
+            }
+            facts.sort();
+            for ( var i = 1; i < facts.length; i++ ) {
+                if ( facts[i] === facts[ i - 1 ] ) {
+                    facts.splice( i--, 1 );
+                }
+            }
+            return facts;
+        };
+
         reset();
         return {
             getResult: getResult,
             newState: newState,
             setGame: setGame,
             reset: reset,
-            getRanking: getRanking
+            getRanking: getRanking,
+            getPossibilities: getPossibilities
         };
     }());
 
     view = (function () {
-        var updateView, updateCell, updateGame, cells, createRanking;
+        var updateView, updateCell, updateGame, cells, createRanking, createPossibilities;
+
+        createPossibilities = function (possibilities) {
+            var div, list, listItem, index;
+            div = $('<div><h1>Possible outcomes</h1></div>');
+            list = $('<ul id="possibilities"></ul>');
+            for (index = 0; index < possibilities.length; ++index) {
+                listItem = $('<li></li>');
+                listItem.text(possibilities[index]);
+                list.append(listItem);
+            }
+            div.append(list);
+            return div;
+        };
 
         createRanking = function (ranking) {
             var index, row, table, htmlRow, htmlCell;
@@ -382,6 +469,7 @@ $(function () {
                 }
             }
             $('#ranking').remove();
+            $('table#results').after(createPossibilities(model.getPossibilities()));
             $('table#results').after(createRanking(model.getRanking()));
         };
 
