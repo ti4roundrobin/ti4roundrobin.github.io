@@ -416,7 +416,7 @@ $(function () {
 
         createPossibilities = function (possibilities) {
             var div, list, listItem, index;
-            div = $('<div><h1>Possible outcomes</h1></div>');
+            div = $('<div><h2>Possible outcomes</h2></div>');
             list = $('<ul id="possibilities"></ul>');
             for (index = 0; index < possibilities.length; ++index) {
                 listItem = $('<li></li>');
